@@ -27,7 +27,7 @@ Eg:
 copy(
     { src: __dirname + '/source/static'
     , dest: __dirname + '/output/static'
-    , excludes: /^\./ // Exclude hidden files
+    , excludes: [ /^\./ ] // Exclude hidden files
     }
   , function () {
     console.log('done!')
