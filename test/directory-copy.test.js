@@ -47,7 +47,10 @@ describe('copy()', function () {
           assert(!err)
           fs.readdir(join(__dirname, 'fixtures', tmpdir), function (err, list) {
             assert(!err)
-            assert.deepEqual(list, [ '.hidden', 'a.txt', 'nest' ])
+            assert.notEqual(list.indexOf('.hidden'), -1)
+            assert.notEqual(list.indexOf('a.txt'), -1)
+            assert.notEqual(list.indexOf('nest'), -1)
+            assert.equal(list.length, 3)
             done()
           })
         })
@@ -63,7 +66,9 @@ describe('copy()', function () {
           assert(!err)
           fs.readdir(join(__dirname, 'fixtures', tmpdir), function (err, list) {
             assert(!err)
-            assert.deepEqual(list, [ 'a.txt', 'nest' ])
+            assert.notEqual(list.indexOf('a.txt'), -1)
+            assert.notEqual(list.indexOf('nest'), -1)
+            assert.equal(list.length, 2)
             done()
           })
         })
