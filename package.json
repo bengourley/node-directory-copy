@@ -11,7 +11,9 @@
   "license": "BSD",
   "dependencies": {
     "async": "~0.1.22",
-    "ncp": "~0.2.6"
+    "ncp": "~0.2.6",
+    "glob": "~3.1.14",
+    "mkdirp": "~0.3.4"
   },
   "devDependencies": {
     "mocha": "~1",

@@ -19,8 +19,9 @@ var copy = require('directory-copy')
   - `dest` the destination directory (required)
   - `excludes` an array of RegExp objects to `.test()` filenames
     against. If the test returns true, the file won't be copied.
-  - `logger` a custom logger object, defaults to console.log
 - `cb` is the callback `function (err) {}` (`err` is null if ok)
+
+`copy()` returns an event emitter that emits 'log' events.
 
 Eg:
 ```js
@@ -31,5 +32,9 @@ copy(
     }
   , function () {
     console.log('done!')
+  })
+  .on('log', function (msg, level) {
+    // Level is debug, info, warn or error
+    console.log(level + ': ' + msg)
   })
 ```
