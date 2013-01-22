@@ -7,6 +7,27 @@ var assert = require('assert')
 
 describe('copy()', function () {
 
+  before(function (done) {
+    var dir = join(__dirname, 'fixtures', 'perms')
+      , file = join(dir, 'no')
+
+    fs.mkdir(dir, function (err) {
+      if (err) throw err
+      fs.writeFile(file, 'foo', function (err) {
+        if (err) throw err
+        fs.chmod(file, '000', function (err) {
+          if (err) throw err
+          done()
+        })
+      })
+    })
+  })
+
+  after(function (done) {
+    var dir = join(__dirname, 'fixtures', 'perms')
+    rimraf(dir, done)
+  })
+
   beforeEach(function (done) {
     rimraf(join(__dirname, 'fixtures', tmpdir), function () {
       fs.mkdir(join(__dirname, 'fixtures', tmpdir), done)
@@ -64,7 +85,7 @@ describe('copy()', function () {
       .on('log', function () { logs++ })
   })
 
-    it('should warn when there are no files to copy', function (done) {
+  it('should warn when there are no files to copy', function (done) {
     var log
     copy(
         { src: join(__dirname, 'fixtures', 'doesnotexist')
@@ -81,8 +102,9 @@ describe('copy()', function () {
       })
   })
 
+
   it('should callback with the error as the first argument', function (done) {
-    var logs = 0
+
     copy(
         { src: join(__dirname, 'fixtures', 'perms')
         , dest: join(__dirname, 'fixtures', tmpdir)
