@@ -1,6 +1,6 @@
 {
   "name": "directory-copy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Copy the contents of one directory to another",
   "main": "directory-copy.js",
   "scripts": {
