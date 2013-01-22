@@ -28,12 +28,14 @@ function copy(options, cb) {
 
       emitter.emit('log', 'Glob found ' + paths.length + ' paths', 'debug')
 
+      var excluded = []
+
       if (options.excludes) {
         paths = paths.filter(function (path) {
           var exclude = options.excludes.some(function (re) {
-            // Deal with case where a directory has had a '/' added
-            if (/\/$/.test(path)) path = path.substr(0, path.length - 1)
-            return re.test(path)
+            var matches = re.test(path)
+            if (matches && /\/$/.test(path)) excluded.push(path)
+            return matches
           })
           if (exclude) emitter.emit('log', 'Excluding ' + path, 'debug')
           return !exclude
@@ -49,6 +51,10 @@ function copy(options, cb) {
         if  (/\/$/.test(path)) {
           dirs.push(join(options.dest, path))
         } else {
+          var exclude = excluded.some(function (ex) {
+            return path.indexOf(ex) === 0
+          })
+          if (exclude) return
           files.push(
             { src: join(options.src, path)
             , dest: join(options.dest, path)

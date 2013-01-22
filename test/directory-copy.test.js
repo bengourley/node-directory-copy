@@ -74,6 +74,23 @@ describe('copy()', function () {
         })
   })
 
+  it('should ignore files below a directory that matched exclude pattern', function (done) {
+    copy(
+        { src: join(__dirname, 'fixtures', 'files')
+        , dest: join(__dirname, 'fixtures', tmpdir)
+        , excludes: [ /^\./, /^nest\/$/ ]
+        }
+      , function (err) {
+          assert(!err)
+          fs.readdir(join(__dirname, 'fixtures', tmpdir), function (err, list) {
+            assert(!err)
+            assert.notEqual(list.indexOf('a.txt'), -1)
+            assert.equal(list.length, 1)
+            done()
+          })
+        })
+  })
+
   it('should emit log events', function (done) {
     var logs = 0
     copy(
