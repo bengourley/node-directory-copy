@@ -48,13 +48,13 @@ function copy(options, cb) {
         , files = []
 
       paths.filter(function (path) {
+        var exclude = excluded.some(function (ex) {
+          return path.indexOf(ex) === 0
+        })
+        if (exclude) return
         if  (/\/$/.test(path)) {
           dirs.push(join(options.dest, path))
         } else {
-          var exclude = excluded.some(function (ex) {
-            return path.indexOf(ex) === 0
-          })
-          if (exclude) return
           files.push(
             { src: join(options.src, path)
             , dest: join(options.dest, path)
