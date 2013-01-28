@@ -1,4 +1,4 @@
-![Build Status](https://travis-ci.org/bengourley/node-directory-copy.png?branch=master)
+[![Build Status](https://travis-ci.org/bengourley/node-directory-copy.png?branch=master)](https://travis-ci.org/bengourley/node-directory-copy)
 
 Copy the contents of one directory to another, and leave behind specified exclusions.
 
