@@ -4,6 +4,7 @@ var assert = require('assert')
   , fs = require('fs')
   , tmpdir = 'tmp'
   , join = require('path').join
+  , async = require('async')
 
 describe('copy()', function () {
 
@@ -135,6 +136,32 @@ describe('copy()', function () {
           assert(err)
           done()
         })
+  })
+
+  it('should preserve file permission masks', function (done) {
+
+    function statCheck(file, expectedMask) {
+      var stats = fs.statSync(file)
+      assert.equal((stats.mode & parseInt ('777', 8)).toString(8), expectedMask)
+    }
+
+    copy(
+      { src: join(__dirname, 'fixtures', 'acl')
+      , dest: join(__dirname, 'fixtures', tmpdir)
+      }
+    , function (err) {
+
+      assert(!err)
+
+      statCheck(join(__dirname, 'fixtures', tmpdir, '700.txt'), '700')
+      statCheck(join(__dirname, 'fixtures', tmpdir, '666.txt'), '666')
+      statCheck(join(__dirname, 'fixtures', tmpdir, '777.txt'), '777')
+      statCheck(join(__dirname, 'fixtures', tmpdir, 'nest'), '777')
+
+      done()
+
+    })
+
   })
 
 })
