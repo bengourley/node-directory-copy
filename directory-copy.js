@@ -77,13 +77,17 @@ function copy(options, cb) {
         emitter.emit('log', 'Directory structure created', 'debug')
 
         async.forEach(files, function (file, done) {
-          var readStream = fs.createReadStream(file.src)
-            , writeStream = fs.createWriteStream(file.dest)
+          // get file permission and preserve
+          fs.stat(file.src, function (err, status) {
+            if (err) { return done(err); }
+            var mode = status.mode & parseInt ("777", 8);
+            var readStream = fs.createReadStream(file.src)
+            , writeStream = fs.createWriteStream(file.dest, {mode: mode});
 
-          readStream.on('error', done)
-          writeStream.on('error', done)
-          readStream.pipe(writeStream).on('close', done)
-
+            readStream.on('error', done)
+            writeStream.on('error', done)
+            readStream.pipe(writeStream).on('close', done)
+          });
         }, function (err) {
           if (!err) emitter.emit('log', 'Files copied', 'debug')
           cb(err)
