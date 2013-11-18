@@ -53,7 +53,7 @@ function copy(options, cb) {
         })
         if (exclude) return
         if  (/\/$/.test(path)) {
-          dirs.push({src:join(options.src, path) ,dest:join(options.dest, path)})
+          dirs.push(join(options.dest, path))
         } else {
           files.push(
             { src: join(options.src, path)
@@ -70,46 +70,36 @@ function copy(options, cb) {
         return cb(null)
       }
 
-      mkdirWithMode = function(dir, mode, cb) {
-        mkdirp(dir, function(err) {
-          if (err) { return cb(err); }
-          fs.chmod(dir, mode, cb);
-        });
-      };
-
-      mkdirAfterStat = function(dirInfo, cb) {
-        fs.stat(dirInfo.src, function(err, status) {
-          if (err) { return cb(err); }
-          var mode = status.mode & 0777;
-          mkdirWithMode(dirInfo.dest, mode, cb);
-        });
-      };
-
-      mkfileAfterStat = function(fileInfo, cb) {
-        fs.stat(fileInfo.src, function (err, status) {
-          if (err) { return cb(err); }
-          var mode = status.mode & 0777;
-          var readStream = fs.createReadStream(fileInfo.src)
-          , writeStream = fs.createWriteStream(fileInfo.dest);
-
-          readStream.on('error', cb)
-          writeStream.on('error', cb)
-          readStream.pipe(writeStream).on('close', function(err) {
-            if (err) { return cb(err); }
-            fs.chmod(fileInfo.dest, mode, cb);
-          });
-        });
-      };
+      //set the umask first
+      var oldumask = process.umask(0);
 
       // Make the new dirs first
-      async.forEach(dirs, mkdirAfterStat, function (err) {
-        if (err) return cb(err)
+      async.forEach(dirs, mkdirp, function (err) {
+        if (err) {
+          //restore umask
+          process.umask(oldumask);
+          return cb(err);
+        }
 
         emitter.emit('log', 'Directory structure created', 'debug')
 
-        async.forEach(files, mkfileAfterStat, function (err) {
+        async.forEach(files, function (file, done) {
+          // get file permission and preserve
+          fs.stat(file.src, function (err, status) {
+            if (err) { return done(err); }
+            var mode = status.mode & parseInt ("777", 8);
+            var readStream = fs.createReadStream(file.src)
+            , writeStream = fs.createWriteStream(file.dest, {mode: mode});
+
+            readStream.on('error', done)
+            writeStream.on('error', done)
+            readStream.pipe(writeStream).on('close', done)
+          });
+        }, function (err) {
           if (!err) emitter.emit('log', 'Files copied', 'debug')
-          cb(err)
+          //restore umask
+          process.umask(oldumask);
+          cb(err);
         })
       })
 
@@ -119,3 +109,5 @@ function copy(options, cb) {
   return emitter
 
 }
+
+
