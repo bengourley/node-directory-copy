@@ -53,7 +53,10 @@ function copy(options, cb) {
         })
         if (exclude) return
         if  (/\/$/.test(path)) {
-          dirs.push(join(options.dest, path))
+          dirs.push({
+            src: join(options.src, path),
+            dest: join(options.dest, path)
+          });
         } else {
           files.push(
             { src: join(options.src, path)
@@ -70,9 +73,21 @@ function copy(options, cb) {
         return cb(null)
       }
 
+      //set the umask 0 for no permission restriction for generated files
+      oldmask = process.umask(0);
+
       // Make the new dirs first
-      async.forEach(dirs, mkdirp, function (err) {
-        if (err) return cb(err)
+      async.forEach(dirs, function(dirInfo, done) {
+        fs.stat(dirInfo.src, function(err, status) {
+          if (err) { return done(err); }
+          var mode = status.mode & 0777;
+          mkdirp(dirInfo.dest, mode, done);
+        });
+      }, function (err) {
+        if (err) { 
+          process.umask(oldmask); // before go back to caller, set the umask back
+          return cb(err);
+        }
 
         emitter.emit('log', 'Directory structure created', 'debug')
 
@@ -80,7 +95,7 @@ function copy(options, cb) {
           // get file permission and preserve
           fs.stat(file.src, function (err, status) {
             if (err) { return done(err); }
-            var mode = status.mode & parseInt ("777", 8);
+            var mode = status.mode & 0777;
             var readStream = fs.createReadStream(file.src)
             , writeStream = fs.createWriteStream(file.dest, {mode: mode});
 
@@ -89,8 +104,9 @@ function copy(options, cb) {
             readStream.pipe(writeStream).on('close', done)
           });
         }, function (err) {
-          if (!err) emitter.emit('log', 'Files copied', 'debug')
-          cb(err)
+          if (!err) emitter.emit('log', 'Files copied', 'debug');
+          process.umask(oldmask); // before go back to caller, set the umask back
+          cb(err);
         })
       })
 

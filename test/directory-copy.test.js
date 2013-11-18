@@ -155,8 +155,10 @@ describe('copy()', function () {
 
       statCheck(join(__dirname, 'fixtures', tmpdir, '700.txt'), '700')
       statCheck(join(__dirname, 'fixtures', tmpdir, '666.txt'), '666')
+      statCheck(join(__dirname, 'fixtures', tmpdir, '644.txt'), '644')
       statCheck(join(__dirname, 'fixtures', tmpdir, '777.txt'), '777')
       statCheck(join(__dirname, 'fixtures', tmpdir, 'nest'), '777')
+      statCheck(join(__dirname, 'fixtures', tmpdir, 'nest2'), '755')
 
       done()
 
