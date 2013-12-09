@@ -82,12 +82,14 @@ function copy(options, cb) {
 
           readStream.on('error', done)
           writeStream.on('error', done)
-          readStream.pipe(writeStream).on('close', function(){
-            fs.lstat(file.src, function(err,stat){
-              !err ? fs.chmod(file.dest, stat.mode, function(err){
-                !err ? done() : cb(err)
-              }) : cb(err);
-            });
+          readStream.pipe(writeStream).on('close', function () {
+            fs.lstat(file.src, function (err,stat) {
+              if (err) return cb(err)
+              fs.chmod(file.dest, stat.mode, function (err) {
+                if (err) return cb(err)
+                done(null)
+              })
+            })
           })
 
         }, function (err) {
