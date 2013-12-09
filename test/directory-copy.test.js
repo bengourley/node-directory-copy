@@ -137,4 +137,24 @@ describe('copy()', function () {
         })
   })
 
+  it('should copy the file permissions from the src', function (done) {
+    copy(
+        { src: join(__dirname, 'fixtures', 'files')
+        , dest: join(__dirname, 'fixtures', tmpdir)
+        }
+      , function (err) {
+          assert(!err)
+          fs.readdir(join(__dirname, 'fixtures', tmpdir), function (err, list) {
+            assert(!err)
+            list.forEach(function(file){
+              var src = join(__dirname, 'fixtures', 'files', file)
+                , dest = join(__dirname, 'fixtures', tmpdir, file)
+              ;
+              assert.equal(fs.lstatSync(src).mode, fs.lstatSync(dest).mode);
+            });
+            done()
+          })
+        })
+  })
+
 })

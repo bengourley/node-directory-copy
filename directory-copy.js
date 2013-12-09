@@ -82,7 +82,13 @@ function copy(options, cb) {
 
           readStream.on('error', done)
           writeStream.on('error', done)
-          readStream.pipe(writeStream).on('close', done)
+          readStream.pipe(writeStream).on('close', function(){
+            fs.lstat(file.src, function(err,stat){
+              !err ? fs.chmod(file.dest, stat.mode, function(err){
+                !err ? done() : cb(err)
+              }) : cb(err);
+            });
+          })
 
         }, function (err) {
           if (!err) emitter.emit('log', 'Files copied', 'debug')
